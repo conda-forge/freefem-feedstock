@@ -1,5 +1,5 @@
 {% set name = "FreeFem" %}
-{% set version = "4.13" %}
+{% set version = "4.14" %}
 
 package:
   name: {{ name|lower }}
@@ -7,12 +7,12 @@ package:
 
 source:
   url: https://github.com/{{ name }}/{{ name }}-sources/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: aefd4ff02333209f7433abef2e74acb621b6946063ff27e81cf2da43120b6ae4
+  sha256: b59c0b5fef859f2225f8d0cd5cedb61e93c00871b61464778cc086c13dc4bb28
   patches:
     - Makefile.am_conda.patch
 
 build:
-  number: 4
+  number: 0
   skip: true  # [win]
 
 requirements:
