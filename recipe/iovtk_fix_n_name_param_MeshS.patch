@@ -1,0 +1,86 @@
+From a1ec184e652356a7ef6b6ba3f9734516ea690f28 Mon Sep 17 00:00:00 2001
+From: LEGRAND Simon <simon.legrand@inria.fr>
+Date: Fri, 21 Feb 2025 17:16:25 +0100
+Subject: [PATCH] Fix n_name_param for MeshS
+
+Update plugin/seq/iovtk.cpp
+
+Co-authored-by: Pierre Jolivet <prj-@users.noreply.github.com>
+
+Update plugin/seq/iovtk.cpp
+
+Co-authored-by: Pierre Jolivet <prj-@users.noreply.github.com>
+---
+ plugin/seq/iovtk.cpp | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/plugin/seq/iovtk.cpp b/plugin/seq/iovtk.cpp
+index 54d932de1..af1d461f0 100644
+--- a/plugin/seq/iovtk.cpp
++++ b/plugin/seq/iovtk.cpp
+@@ -1385,7 +1385,7 @@ class VTK_LoadMesh_Op : public E_F0mps {
+ basicAC_F0::name_and_type VTK_LoadMesh_Op::name_param[] = {{"reft", &typeid(long)},
+                                                            {"swap", &typeid(bool)},
+                                                            {"refe", &typeid(long)},
+-                                                           {"namelabel", &typeid(string)},
++                                                           {"namelabel", &typeid(string*)},
+                                                            {"fields", &typeid( KN<KN<double> >*)}};
+ 
+ class VTK_LoadMesh : public OneOperator {
+@@ -3235,7 +3235,7 @@ class VTK_LoadMesh3_Op : public E_F0mps {
+ 
+ basicAC_F0::name_and_type VTK_LoadMesh3_Op::name_param[] = {
+   {"reftet", &typeid(long)},         {"swap", &typeid(bool)},
+-  {"refface", &typeid(long)},        {"namelabel", &typeid(string)},
++  {"refface", &typeid(long)},        {"namelabel", &typeid(string*)},
+   {"cleanmesh", &typeid(bool)},      {"removeduplicate", &typeid(bool)},
+   {"precisvertice", &typeid(double)},
+   {"fields", &typeid( KN<KN<double> >*)}
+@@ -5635,9 +5635,9 @@ class VTK_WriteMeshT_Op : public E_F0mps {
+ 
+   vector< Expression2 > l;
+ #ifndef COMMON_HPDDM_PARALLEL_IO
+-  static const int n_name_param = 8;
++  static const int n_name_param = std::is_same<MMesh, MeshS>::value ? 8 : 7;
+ #else
+-  static const int n_name_param = 9;
++  static const int n_name_param = std::is_same<MMesh, MeshS>::value ? 9 : 8;;
+ #endif
+   static basicAC_F0::name_and_type name_param[];
+   Expression nargs[n_name_param];
+@@ -5650,6 +5650,9 @@ class VTK_WriteMeshT_Op : public E_F0mps {
+   bool arg(int i, Stack stack, bool a) const {
+     return nargs[i] ? GetAny< bool >((*nargs[i])(stack)) : a;
+   }
++  string* arg(int i, Stack stack, string* a) const {
++    return nargs[i] ? GetAny< string* >((*nargs[i])(stack)) : a;
++  }
+   double arg(int i, Stack stack, double a) const {
+     return nargs[i] ? GetAny< double >((*nargs[i])(stack)) : a;
+   }
+@@ -6337,6 +6340,7 @@ class VTK_LoadMeshT_Op : public E_F0mps {
+   double arg(int i, Stack stack, double a) const {
+     return nargs[i] ? GetAny< double >((*nargs[i])(stack)) : a;
+   }
++  string* arg(int i, Stack stack, string* a) const { return nargs[i] ? GetAny< string* >((*nargs[i])(stack)) : a;}
+   KN<KN<double> >* arg(int i, Stack stack,KN<KN<double> >*p) const {
+     return nargs[i] ? GetAny< KN<KN<double> >* >((*nargs[i])(stack)) : p;
+   }
+@@ -6358,7 +6362,7 @@ basicAC_F0::name_and_type VTK_LoadMeshT_Op< MeshS >::name_param[] = {
+   {"reftri", &typeid(long)},         
+   {"swap", &typeid(bool)},
+   {"refedge", &typeid(long)},        
+-  {"namelabel", &typeid(string)},
++  {"namelabel", &typeid(string*)},
+   {"cleanmesh", &typeid(bool)},      
+   {"removeduplicate", &typeid(bool)},
+   {"precisvertice", &typeid(double)},
+@@ -6371,7 +6375,7 @@ basicAC_F0::name_and_type VTK_LoadMeshT_Op< MeshL >::name_param[] = {
+   {"refedge", &typeid(long)},        
+   {"swap", &typeid(bool)},
+   {"refbdpoint", &typeid(long)},     
+-  {"namelabel", &typeid(string)},
++  {"namelabel", &typeid(string*)},
+   {"cleanmesh", &typeid(bool)},      
+   {"removeduplicate", &typeid(bool)},
+   {"precisvertice", &typeid(double)},

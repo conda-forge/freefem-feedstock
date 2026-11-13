@@ -12,7 +12,7 @@
 
 package:
   name: {{ name|lower }}
-  version: {{ version }}
+  version: "{{ version }}"
 
 source:
   url: https://github.com/{{ name }}/{{ name }}-sources/archive/refs/tags/v{{ version }}.tar.gz
@@ -20,6 +20,8 @@ source:
   patches:
     - Makefile.am_conda.patch
     - Makefile.am_src_bin-win32_conda.patch
+    - ff-NLopt_nlopt-2.9.patch  # NLopt>=2.9 removed LD_LBFGS_NOCEDAL
+    - iovtk_fix_n_name_param_MeshS.patch  # upstream a1ec184e6, fixes testvtk.edp segfault
 
 build:
   number: {{ build }}
@@ -38,7 +40,9 @@ build:
   {% endif %}
   string: "{{ mpi_prefix }}_h{{ PKG_HASH }}_{{ build }}"
   run_exports:
-    - {{ pin_subpackage('freefem', max_pin='x.x') }} {{ mpi_prefix }}_*  
+    # equivalent to pin_subpackage('freefem', max_pin='x.x') plus a build-string glob, written out
+    # by hand because conda-smithy's R-027 lint misreads `pin_subpackage(...) <build glob>`
+    - freefem >={{ version }},<{{ version.split('.')[0] }}.{{ version.split('.')[1]|int + 1 }}.0a0 {{ mpi_prefix }}_*
 
 requirements:
   build:
@@ -73,20 +77,23 @@ requirements:
     - gmm  # [unix]
     - gsl
     - freeglut  # [linux]
-    - ipopt
+    # ipopt needs mumps-seq, which can't coexist with petsc's mumps-mpi since MUMPS 5.8
+    # (conda-forge/mumps-feedstock#144) -> Ipopt plugin only in the nompi variant for now
+    - ipopt  # [mpi == 'nompi']
     - nlopt
     - metis
     - mumps-seq  # [not osx and mpi == 'nompi']
     - mumps-mpi  # [mpi != 'nompi']
-    - petsc  # [not osx]
-    - slepc  # [unix]
+    - petsc  # [mpi != 'nompi']
+    - slepc  # [mpi != 'nompi']
     - parmetis
     - mmgsuite
     - scalapack
     - scotch
     - hdf5
-    - lapack
-    - openblas
+    - libblas
+    - libcblas
+    - liblapack
     - suitesparse
     - superlu  # [unix]
     - tetgen
@@ -96,7 +103,6 @@ requirements:
   run:
     - {{ mpi }}  # [mpi != 'nompi']
     - {{ pin_compatible('hdf5', max_pin='x.x') }}
-    - {{ pin_compatible('lapack', max_pin='x.x') }}
 
 test:
   commands:
@@ -108,10 +114,10 @@ test:
     - if not exist $PREFIX\\bin\\ff-c++ exit 1  # [win] 
     - test -f $PREFIX/bin/ff-get-dep  # [unix]
     - if not exist $PREFIX\\bin\\ff-get-dep exit 1  # [win]
-    - test -f $PREFIX/bin/ff-pkg-download  # [unix
+    - test -f $PREFIX/bin/ff-pkg-download  # [unix]
     - if not exist $PREFIX\\bin\\ff-pkg-download exit 1  # [win]
-    - FreeFem++ $PREFIX/share/FreeFEM/${PKG_VERSION}/examples/tutorial/beam.edp  # [linux]
-    - FreeFem++ $PREFIX/share/FreeFEM/${PKG_VERSION}/examples/3dSurf/buildMeshSfromMesh3.edp  # [linux]
+    - FreeFem++ -nw $PREFIX/share/FreeFEM/${PKG_VERSION}/examples/tutorial/beam.edp  # [linux]
+    - FreeFem++ -nw $PREFIX/share/FreeFEM/${PKG_VERSION}/examples/3dSurf/buildMeshSfromMesh3.edp  # [linux]
 
 about:
   home: https://freefem.org/
