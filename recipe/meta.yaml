@@ -12,7 +12,7 @@
 
 package:
   name: {{ name|lower }}
-  version: {{ version }}
+  version: "{{ version }}"
 
 source:
   url: https://github.com/{{ name }}/{{ name }}-sources/archive/refs/tags/v{{ version }}.tar.gz
@@ -21,6 +21,7 @@ source:
     - Makefile.am_conda.patch
     - Makefile.am_src_bin-win32_conda.patch
     - ff-NLopt_nlopt-2.9.patch  # NLopt>=2.9 removed LD_LBFGS_NOCEDAL
+    - iovtk_fix_n_name_param_MeshS.patch  # upstream a1ec184e6, fixes testvtk.edp segfault
 
 build:
   number: {{ build }}
@@ -39,7 +40,9 @@ build:
   {% endif %}
   string: "{{ mpi_prefix }}_h{{ PKG_HASH }}_{{ build }}"
   run_exports:
-    - {{ pin_subpackage('freefem', max_pin='x.x') }} {{ mpi_prefix }}_*  
+    # equivalent to pin_subpackage('freefem', max_pin='x.x') plus a build-string glob, written out
+    # by hand because conda-smithy's R-027 lint misreads `pin_subpackage(...) <build glob>`
+    - freefem >={{ version }},<{{ version.split('.')[0] }}.{{ version.split('.')[1]|int + 1 }}.0a0 {{ mpi_prefix }}_*
 
 requirements:
   build:
