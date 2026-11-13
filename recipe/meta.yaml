@@ -114,10 +114,10 @@ test:
     - if not exist $PREFIX\\bin\\ff-c++ exit 1  # [win] 
     - test -f $PREFIX/bin/ff-get-dep  # [unix]
     - if not exist $PREFIX\\bin\\ff-get-dep exit 1  # [win]
-    - test -f $PREFIX/bin/ff-pkg-download  # [unix
+    - test -f $PREFIX/bin/ff-pkg-download  # [unix]
     - if not exist $PREFIX\\bin\\ff-pkg-download exit 1  # [win]
-    - FreeFem++ $PREFIX/share/FreeFEM/${PKG_VERSION}/examples/tutorial/beam.edp  # [linux]
-    - FreeFem++ $PREFIX/share/FreeFEM/${PKG_VERSION}/examples/3dSurf/buildMeshSfromMesh3.edp  # [linux]
+    - FreeFem++ -nw $PREFIX/share/FreeFEM/${PKG_VERSION}/examples/tutorial/beam.edp  # [linux]
+    - FreeFem++ -nw $PREFIX/share/FreeFEM/${PKG_VERSION}/examples/3dSurf/buildMeshSfromMesh3.edp  # [linux]
 
 about:
   home: https://freefem.org/
