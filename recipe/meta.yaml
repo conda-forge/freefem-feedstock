@@ -20,6 +20,7 @@ source:
   patches:
     - Makefile.am_conda.patch
     - Makefile.am_src_bin-win32_conda.patch
+    - ff-NLopt_nlopt-2.9.patch  # NLopt>=2.9 removed LD_LBFGS_NOCEDAL
 
 build:
   number: {{ build }}
@@ -73,20 +74,23 @@ requirements:
     - gmm  # [unix]
     - gsl
     - freeglut  # [linux]
-    - ipopt
+    # ipopt needs mumps-seq, which can't coexist with petsc's mumps-mpi since MUMPS 5.8
+    # (conda-forge/mumps-feedstock#144) -> Ipopt plugin only in the nompi variant for now
+    - ipopt  # [mpi == 'nompi']
     - nlopt
     - metis
     - mumps-seq  # [not osx and mpi == 'nompi']
     - mumps-mpi  # [mpi != 'nompi']
-    - petsc  # [not osx]
-    - slepc  # [unix]
+    - petsc  # [mpi != 'nompi']
+    - slepc  # [mpi != 'nompi']
     - parmetis
     - mmgsuite
     - scalapack
     - scotch
     - hdf5
-    - lapack
-    - openblas
+    - libblas
+    - libcblas
+    - liblapack
     - suitesparse
     - superlu  # [unix]
     - tetgen
@@ -96,7 +100,6 @@ requirements:
   run:
     - {{ mpi }}  # [mpi != 'nompi']
     - {{ pin_compatible('hdf5', max_pin='x.x') }}
-    - {{ pin_compatible('lapack', max_pin='x.x') }}
 
 test:
   commands:
