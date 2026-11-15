@@ -1,6 +1,6 @@
 {% set name = "FreeFem" %}
 {% set version = "4.15" %}
-{% set build = 1 %}
+{% set build = 2 %}
 
 # ensure mpi is defined (needed for conda-smithy recipe-lint)
 {% set mpi = mpi or 'nompi' %}
@@ -23,6 +23,7 @@ source:
     - ff-NLopt_nlopt-2.9.patch  # NLopt>=2.9 removed LD_LBFGS_NOCEDAL
     - iovtk_fix_n_name_param_MeshS.patch  # upstream a1ec184e6, fixes testvtk.edp segfault
     - ax_lib_hdf5_cmake-lists.patch  # HDF5>=2 h5cc -showconfig lists libs ';'-separated
+    - configure.ac_conda-layout.patch  # detect conda-forge superlu/scotch/mmg (SuperLu, scotch, mmg plugins)
 
 build:
   number: {{ build }}

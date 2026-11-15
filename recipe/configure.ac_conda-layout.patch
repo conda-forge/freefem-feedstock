@@ -1,0 +1,22 @@
+--- configure.ac.orig
++++ configure.ac
+@@ -2232,9 +2232,11 @@
+ 	[[mumps_scotch],[-lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch],[dmumps_c.h]],
+ 	[[fftw3],[-lfftw3],[${inc_usr_include}fftw3.h],[]],
+ 	[[superlu],[-lsuperlu],[${inc_usr_include}superlu/superlu_enum_consts.h],[]],
++	[[superlu],[-lsuperlu],[superlu_enum_consts.h],[]],
+         [[blacs],[ -lblacsCinit$ff_with_mpi	-lblacsF77init$ff_with_mpi	-lblacs$ff_with_mpi],[]],
+         [[scalapack],[-lscalapack$ff_with_mpi],[]],
+         [[scotch],[-lscotch -lscotcherr],[scotch.h]],
++        [[scotch],[-lscotch -lscotcherr],[]],
+         [[ptscotch],[-lptscotch -lptscotcherr],[ptscotch.h]],
+ 	[[metis],[-lmetis],[${inc_usr_include}metis/metis.h],[]],
+ 	[[metis],[-lmetis],[metis.h],[]],
+@@ -2242,6 +2244,7 @@
+ 	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
+ 	[[mmg3d],[-lmmg3d-v4],[libmmg3d.h],[]],
+         [[mmg],[-lmmg],[libmmg.h],[]],
++        [[mmg],[-lmmg],[mmg/libmmg.h],[]],
+         [[zlib],[-lz],[zlib.h],[]],
+         [[parmmg],[-lparmmg],[libparmmg.h],[]],
+ 	[[mshmet],[-lmshmet],[mshmetlib.h],[]],
