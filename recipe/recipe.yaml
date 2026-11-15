@@ -38,6 +38,9 @@ source:
       # make check: drop hpddm/mf-2d-SLEPc.edp (singular-vector comparison fails with -np 4) and
       # ffddm tests that need PETSc-complex/bemtool but are only gated on PETSC
       - examples_skip-unsupported-tests.patch
+      # installed FreeFem++ never found its freefem++.pref (so no plugin could be loaded): GCC folds
+      # the build-time length of FF_PREFIX_DIR, which breaks when conda relocates the prefix
+      - environment_relocatable-prefix.patch
   # HPDDM (header-only, not packaged on conda-forge) is needed by the PETSc/SLEPc/hpddm plugins.
   # It is placed where 3rdparty/getall expects it. getall's md5 check (patched above) accepts it,
   # so --enable-download_hpddm uses it without network access.
@@ -126,6 +129,8 @@ tests:
   - script:
       - FreeFem++ -nw $PREFIX/share/FreeFEM/${{ version }}/examples/tutorial/beam.edp
       - FreeFem++ -nw $PREFIX/share/FreeFEM/${{ version }}/examples/3dSurf/buildMeshSfromMesh3.edp
+      # an installed plugin loads (needs the relocated freefem++.pref lookup)
+      - FreeFem++ -nw $PREFIX/share/FreeFEM/${{ version }}/examples/plugin/ilut.edp
       # MPI variants: the installed PETSc/SLEPc/hpddm plugins load and solve
       - if: mpi != "nompi"
         then:
