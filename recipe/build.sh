@@ -35,7 +35,9 @@ export LD_LIBRARY_PATH="${PREFIX}/lib"
 # Unpack HPDDM once before the parallel build: under make -j, 3rdparty's install-hpddm runs
 # concurrently and the two 'rm -rf hpddm-*; unzip' race (missing HPDDM_define.hpp)
 if [[ -f 3rdparty/pkg/hpddm.zip ]]; then
+  mkdir -p 3rdparty/include 3rdparty/lib
   make -C 3rdparty include/hpddm/done.tag lib/WHERE.hpddm
+  test -f 3rdparty/include/hpddm/include/HPDDM_define.hpp
 fi
 make -j $CPU_COUNT
 make install
@@ -46,9 +48,17 @@ if [[ -n "$mpi" && "$mpi" != "nompi" ]]; then
   # MPI examples run as ff-mpirun -np 4 under a 60 s CPU ulimit (bin/test-driver-ff). Running
   # them in parallel oversubscribes the runner, MPI busy-polling burns CPU time, and tests get
   # killed (seen with mpich on ffddm/natural_convection.edp), so run them one at a time
-  make check
+  CHECK_JOBS=1
 else
-  make check -j $CPU_COUNT
+  CHECK_JOBS=$CPU_COUNT
+fi
+if ! make check -j $CHECK_JOBS; then
+  # CI only shows the summary; print the end of each failing test's log
+  for trs in $(grep -l -E '^:test-result: (FAIL|ERROR)' examples/*/*.trs); do
+    echo "======== ${trs%.trs}.log"
+    tail -40 "${trs%.trs}.log"
+  done
+  exit 1
 fi
 
 echo "**************** F R E E F E M  B U I L D  E N D S  H E R E ****************"
