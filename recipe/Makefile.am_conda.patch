@@ -1,6 +1,6 @@
 --- Makefile.am.orig
 +++ Makefile.am
-@@ -288,8 +288,8 @@
+@@ -281,8 +281,8 @@
  
  	test `uname` != Darwin || $(MAKE) FreeFem++-CoCoa bin/script/PostInstall.sh
  	$(mkinstalldirs) -m 755 "$(DESTDIR)$(pkgdatadir)/$(VERSION)"
@@ -11,12 +11,12 @@
  	make build-edp 
  	tar cvf - $(FF_EXAMPLES_FILES)| (cd "$(DESTDIR)$(pkgdatadir)/$(VERSION)"; tar xvf -)
  	$(INSTALL_SCRIPT) examples/CheckAll examples/CheckAllEdp "$(DESTDIR)$(pkgdatadir)/$(VERSION)"
-@@ -298,7 +298,7 @@
- 	cd idp; for i in *.idp; do \
+@@ -292,7 +292,7 @@
  		if [ -f $$i ]; then $(INSTALL) -m 555 $$i "$(DESTDIR)$(ff_prefix_dir)/idp"; fi; done
  	test ! -s FreeFEM-documentation.pdf || $(INSTALL_DATA) FreeFEM-documentation.pdf "$(DESTDIR)$(pkgdatadir)" 	
--	test `uname` != Darwin || ( rm "$(DESTDIR)/usr/local/bin/FreeFem++-CoCoa"; $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)/usr/local/bin" )		
-+	test `uname` != Darwin || ( rm "$(DESTDIR)$(pkgdatadir)/usr/local/bin/FreeFem++-CoCoa"; $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)$(pkgdatadir)/usr/local/bin" )		
+ #  not error if PB insall FreeFem++-CoCoa in /usr/local/bin/
+-	-test `uname` != Darwin || ( rm "$(DESTDIR)/usr/local/bin/FreeFem++-CoCoa"; $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)/usr/local/bin" )		
++	-test `uname` != Darwin || ( rm "$(DESTDIR)$(pkgdatadir)/usr/local/bin/FreeFem++-CoCoa"; $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)$(pkgdatadir)/usr/local/bin" )		
  	test `uname` != Darwin || $(INSTALL_SCRIPT) FreeFem++-CoCoa "$(DESTDIR)${bindir}"
  #    need sudo ...	
  #winDssSSs	test `uname` != Darwin || echo "$(bindir)" > "$(DESTDIR)/etc/paths.d/FreeFem++"
