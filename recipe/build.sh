@@ -49,6 +49,9 @@ if [[ -n "$mpi" && "$mpi" != "nompi" ]]; then
   # them in parallel oversubscribes the runner, MPI busy-polling burns CPU time, and tests get
   # killed (seen with mpich on ffddm/natural_convection.edp), so run them one at a time
   CHECK_JOBS=1
+  # MPICH busy-polls, so a rank's CPU time grows with wall time; ffddm/natural_convection.edp got
+  # killed at the default 60 s while still converging
+  export FF_TEST_CPU_LIMIT=300 FF_TEST_MPIEXEC_TIMEOUT=300
 else
   CHECK_JOBS=$CPU_COUNT
 fi

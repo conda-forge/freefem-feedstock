@@ -41,6 +41,8 @@ source:
       # installed FreeFem++ never found its freefem++.pref (so no plugin could be loaded): GCC folds
       # the build-time length of FF_PREFIX_DIR, which breaks when conda relocates the prefix
       - environment_relocatable-prefix.patch
+      # make check: CPU ulimit (60 s) and MPIEXEC_TIMEOUT (50 s) overridable (FF_TEST_*)
+      - test-driver-ff_cpu-limit.patch
   # HPDDM (header-only, not packaged on conda-forge) is needed by the PETSc/SLEPc/hpddm plugins.
   # It is placed where 3rdparty/getall expects it. getall's md5 check (patched above) accepts it,
   # so --enable-download_hpddm uses it without network access.

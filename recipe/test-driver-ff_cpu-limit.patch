@@ -1,0 +1,14 @@
+--- bin/test-driver-ff.orig
++++ bin/test-driver-ff
+@@ -118,8 +118,9 @@
+ else
+ 	FLAGS_FFPP_B="${FLAGS_FFPP}"
+ fi
+-export MPIEXEC_TIMEOUT=50
+-test -z "${COMMONPROGRAMFILES+x}" -a -z "${WINDIR+x}" && ulimit -t 60
++# conda-forge: limits overridable (MPI busy-polling inflates CPU time of long MPI tests)
++export MPIEXEC_TIMEOUT=${FF_TEST_MPIEXEC_TIMEOUT:-50}
++test -z "${COMMONPROGRAMFILES+x}" -a -z "${WINDIR+x}" && ulimit -t ${FF_TEST_CPU_LIMIT:-60}
+ ${TEST_FFPP} ${FLAGS_FFPP_B}  "$@" ${FLAGS_FFPP_A}>$log_file 2>&1
+ estatus=$?
+ echo "status " $estatus >>$log_file 
