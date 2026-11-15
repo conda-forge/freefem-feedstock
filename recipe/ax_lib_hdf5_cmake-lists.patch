@@ -1,0 +1,12 @@
+--- etc/config/m4/ax_lib_hdf5.m4.orig
++++ etc/config/m4/ax_lib_hdf5.m4
+@@ -212,7 +212,8 @@
+         dnl
+         HDF5_tmp_flags=$(eval $H5CC -showconfig \
+             | $GREP 'FLAGS\|Extra libraries:' \
+-            | $AWK -F: '{printf("%s "), $[]2}' )
++            | $AWK -F: '{printf("%s "), $[]2}' \
++            | tr ';' ' ' )
+ 
+         dnl Find the installation directory and append include/
+         HDF5_tmp_inst=$(eval $H5CC -showconfig \

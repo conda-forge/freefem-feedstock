@@ -27,9 +27,9 @@ fortran_compiler:
 fortran_compiler_version:
 - '15'
 gsl:
-- '2.7'
+- '2.8'
 hdf5:
-- 1.14.6
+- '2'
 ipopt:
 - 3.14.20
 libblas:
@@ -41,7 +41,7 @@ liblapack:
 metis:
 - 5.1.0
 mpi:
-- mpich
+- openmpi
 mpich:
 - '5'
 mumps_mpi:
