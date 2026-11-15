@@ -1,0 +1,130 @@
+schema_version: 1
+
+context:
+  name: FreeFem
+  version: "4.15"
+  build_num: 3
+  # nompi gets +100 so the solver prefers it by default
+  # https://conda-forge.org/docs/maintainer/knowledge_base/#preferring-a-provider-usually-nompi
+  build_number: ${{ build_num + 100 if mpi == "nompi" else build_num }}
+  # build string prefix so dependents can select a variant:
+  #   `freefem * mpi_mpich_*`, `freefem * mpi_*`, `freefem * nompi_*`
+  mpi_prefix: ${{ "nompi" if mpi == "nompi" else "mpi_" ~ mpi }}
+
+package:
+  name: ${{ name | lower }}
+  version: ${{ version }}
+
+source:
+  url: https://github.com/${{ name }}/${{ name }}-sources/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: a47af5a7c7006ae8c648845e55d732ea403837af869493000a008b2013c698e3
+  patches:
+    - Makefile.am_conda.patch
+    - Makefile.am_src_bin-win32_conda.patch
+    # NLopt>=2.9 removed LD_LBFGS_NOCEDAL
+    - ff-NLopt_nlopt-2.9.patch
+    # upstream a1ec184e6, fixes testvtk.edp segfault
+    - iovtk_fix_n_name_param_MeshS.patch
+    # HDF5>=2 h5cc -showconfig lists libs ';'-separated
+    - ax_lib_hdf5_cmake-lists.patch
+    # detect conda-forge superlu/scotch/mmg (SuperLu, scotch, mmg plugins)
+    - configure.ac_conda-layout.patch
+
+build:
+  number: ${{ build_number }}
+  script:
+    file: build.sh
+    env:
+      mpi: ${{ mpi }}
+  string: ${{ mpi_prefix }}_h${{ hash }}_${{ build_number }}
+  skip:
+    - osx
+    - win
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
+    - ${{ compiler('cxx') }}
+    - ${{ compiler('fortran') }}
+    - autoconf
+    - automake
+    - bison
+    - flex
+    - m4
+    - make
+    # HDF5>=2 h5cc is a pkg-config wrapper
+    - pkg-config
+    - patch
+    - unzip
+  host:
+    - arpack
+    - fftw
+    - gmm
+    - gsl
+    - freeglut
+    - nlopt
+    - metis
+    - if: mpi == "nompi"
+      then:
+        - mumps-seq
+        # ipopt needs mumps-seq, which can't coexist with petsc's mumps-mpi (mumps-feedstock#144)
+        - ipopt
+      else:
+        - mumps-mpi
+        - ${{ mpi }}
+        # PETSc/SLEPc plugins only exist in plugin/mpi
+        - petsc
+        - slepc
+        # parmetis/scalapack only exist as MPI builds; FreeFEM only uses them in plugin/mpi
+        - parmetis
+        - scalapack
+    - mmgsuite
+    - scotch
+    - hdf5
+    - libblas
+    - libcblas
+    - liblapack
+    - suitesparse
+    - superlu
+    - tetgen
+    - zlib
+    - zstd
+  run:
+    - if: mpi != "nompi"
+      then: ${{ mpi }}
+    - ${{ pin_compatible('hdf5', upper_bound='x.x') }}
+  run_exports:
+    - ${{ pin_subpackage('freefem', upper_bound='x.x', build=mpi_prefix ~ '_*') }}
+
+tests:
+  - package_contents:
+      bin:
+        - FreeFem++
+        - FreeFem++-nw
+        - ff-c++
+        - ff-get-dep
+        - ff-pkg-download
+  - script:
+      - FreeFem++ -nw $PREFIX/share/FreeFEM/${{ version }}/examples/tutorial/beam.edp
+      - FreeFem++ -nw $PREFIX/share/FreeFEM/${{ version }}/examples/3dSurf/buildMeshSfromMesh3.edp
+
+about:
+  homepage: https://freefem.org/
+  license: LGPL-3.0-only
+  license_file: LICENSE.txt
+  summary: 'FreeFem : A high level multiphysics finite element software'
+  description: >
+    FreeFEM is a popular 2D and 3D partial differential equations (PDE) solver used by
+    thousands of researchers across the world. It allows you to easily implement your own
+    physics modules using the provided FreeFEM language. FreeFEM offers a large list of
+    finite elements, like the Lagrange, Taylor-Hood, etc., usable in the continuous and
+    discontinuous Galerkin method framework.
+  documentation: https://doc.freefem.org
+  repository: https://github.com/FreeFem/FreeFem-sources
+
+extra:
+  recipe-maintainers:
+    - ldallolio
+    - cnrdn
+    - fbordeu
