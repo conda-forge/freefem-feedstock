@@ -2,7 +2,7 @@ schema_version: 1
 
 context:
   name: FreeFem
-  version: "4.16"
+  version: "4.17"
   build_num: 0
   # nompi gets +100 so the solver prefers it by default
   # https://conda-forge.org/docs/maintainer/knowledge_base/#preferring-a-provider-usually-nompi
@@ -17,7 +17,7 @@ package:
 
 source:
   url: https://github.com/${{ name }}/${{ name }}-sources/archive/refs/tags/v${{ version }}.tar.gz
-  sha256: 9921af94fb69c85a650b05b0eeb4d56623af35f5d71d635b7ba5e2508c02246a
+  sha256: b1198448c0394d42d8371e398aee209a92a50067082d866cdf5f11f56a636835
   patches:
     - Makefile.am_conda.patch
     - Makefile.am_src_bin-win32_conda.patch
