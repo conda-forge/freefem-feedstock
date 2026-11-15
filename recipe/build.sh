@@ -29,6 +29,11 @@ export LD_LIBRARY_PATH="${PREFIX}/lib"
             --enable-gmm \
             --enable-optim
 
+# Unpack HPDDM once before the parallel build: under make -j, 3rdparty's install-hpddm runs
+# concurrently and the two 'rm -rf hpddm-*; unzip' race (missing HPDDM_define.hpp)
+if [[ -f 3rdparty/pkg/hpddm.zip ]]; then
+  make -C 3rdparty include/hpddm/done.tag lib/WHERE.hpddm
+fi
 make -j $CPU_COUNT
 make install
 cp $PREFIX/lib/ff++/${PKG_VERSION}/lib/*${SHLIB_EXT} $PREFIX/lib
