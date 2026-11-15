@@ -1,6 +1,6 @@
 --- configure.ac.orig
 +++ configure.ac
-@@ -2232,9 +2232,11 @@
+@@ -2265,9 +2265,11 @@
  	[[mumps_scotch],[-lpord_scotch -lmumps_common_scotch -ldmumps_scotch -lzmumps_scotch -lpord_scotch],[dmumps_c.h]],
  	[[fftw3],[-lfftw3],[${inc_usr_include}fftw3.h],[]],
  	[[superlu],[-lsuperlu],[${inc_usr_include}superlu/superlu_enum_consts.h],[]],
@@ -12,11 +12,12 @@
          [[ptscotch],[-lptscotch -lptscotcherr],[ptscotch.h]],
  	[[metis],[-lmetis],[${inc_usr_include}metis/metis.h],[]],
  	[[metis],[-lmetis],[metis.h],[]],
-@@ -2242,6 +2244,7 @@
+@@ -2275,6 +2277,8 @@
  	[[freeyams],[-lfreeyams],[freeyamslib.h],[]],
  	[[mmg3d],[-lmmg3d-v4],[libmmg3d.h],[]],
          [[mmg],[-lmmg],[libmmg.h],[]],
 +        [[mmg],[-lmmg],[mmg/libmmg.h],[]],
++        [[gmm],[],[gmm/gmm.h],[]],
          [[zlib],[-lz],[zlib.h],[]],
          [[parmmg],[-lparmmg],[libparmmg.h],[]],
  	[[mshmet],[-lmshmet],[mshmetlib.h],[]],

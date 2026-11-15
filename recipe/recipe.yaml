@@ -3,7 +3,7 @@ schema_version: 1
 context:
   name: FreeFem
   version: "4.17"
-  build_num: 0
+  build_num: 1
   # nompi gets +100 so the solver prefers it by default
   # https://conda-forge.org/docs/maintainer/knowledge_base/#preferring-a-provider-usually-nompi
   build_number: ${{ build_num + 100 if mpi == "nompi" else build_num }}
@@ -16,17 +16,42 @@ package:
   version: ${{ version }}
 
 source:
-  url: https://github.com/${{ name }}/${{ name }}-sources/archive/refs/tags/v${{ version }}.tar.gz
-  sha256: b1198448c0394d42d8371e398aee209a92a50067082d866cdf5f11f56a636835
-  patches:
-    - Makefile.am_conda.patch
-    - Makefile.am_src_bin-win32_conda.patch
-    # NLopt>=2.9 removed LD_LBFGS_NOCEDAL
-    - ff-NLopt_nlopt-2.9.patch
-    # HDF5>=2 h5cc -showconfig lists libs ';'-separated
-    - ax_lib_hdf5_cmake-lists.patch
-    # detect conda-forge superlu/scotch/mmg (SuperLu, scotch, mmg plugins)
-    - configure.ac_conda-layout.patch
+  - url: https://github.com/${{ name }}/${{ name }}-sources/archive/refs/tags/v${{ version }}.tar.gz
+    sha256: b1198448c0394d42d8371e398aee209a92a50067082d866cdf5f11f56a636835
+    patches:
+      - Makefile.am_conda.patch
+      - Makefile.am_src_bin-win32_conda.patch
+      # NLopt>=2.9 removed LD_LBFGS_NOCEDAL
+      - ff-NLopt_nlopt-2.9.patch
+      # HDF5>=2 h5cc -showconfig lists libs ';'-separated
+      - ax_lib_hdf5_cmake-lists.patch
+      # detect conda-forge superlu/scotch/mmg/gmm (SuperLu, scotch, mmg, ilut plugins)
+      - configure.ac_conda-layout.patch
+      # 3rdparty/getall: HPDDM v2.4.1 (the version PETSc 3.26 uses) instead of a 2021 commit that
+      # doesn't compile against PETSc >= 3.17 (PetscOptionsBegin is now a statement macro)
+      - getall_hpddm-2.4.1.patch
+      # upstream bacfd971c9 (PETSc-code.hpp part): HPDDM 2.4.1 removed Wrapper<T>::d__1
+      - PETSc-code_petsc-3.26.patch
+      # PCHPDDM calls guarded by defined(PCHPDDM) (always true) instead of PETSC_HAVE_HPDDM;
+      # conda-forge's PETSc has no HPDDM, so PETSc.so failed to load (undefined PCHPDDMSetAuxiliaryMat)
+      - PETSc-code_PCHPDDM-guard.patch
+      # make check: drop hpddm/mf-2d-SLEPc.edp (singular-vector comparison fails with -np 4) and
+      # ffddm tests that need PETSc-complex/bemtool but are only gated on PETSC
+      - examples_skip-unsupported-tests.patch
+      # installed FreeFem++ never found its freefem++.pref (so no plugin could be loaded): GCC folds
+      # the build-time length of FF_PREFIX_DIR, which breaks when conda relocates the prefix
+      - environment_relocatable-prefix.patch
+      # make check: CPU ulimit (60 s) and MPIEXEC_TIMEOUT (50 s) overridable (FF_TEST_*)
+      - test-driver-ff_cpu-limit.patch
+  # HPDDM (header-only, not packaged on conda-forge) is needed by the PETSc/SLEPc/hpddm plugins.
+  # It is placed where 3rdparty/getall expects it. getall's md5 check (patched above) accepts it,
+  # so --enable-download_hpddm uses it without network access.
+  - if: mpi != "nompi"
+    then:
+      url: https://codeload.github.com/hpddm/hpddm/zip/refs/tags/v2.4.1
+      sha256: 8c9bbd522900efaa5da25572b2718fc8f8b47a435023d242314adedc9de91727
+      file_name: hpddm.zip
+      target_directory: 3rdparty/pkg
 
 build:
   number: ${{ build_number }}
@@ -106,11 +131,23 @@ tests:
   - script:
       - FreeFem++ -nw $PREFIX/share/FreeFEM/${{ version }}/examples/tutorial/beam.edp
       - FreeFem++ -nw $PREFIX/share/FreeFEM/${{ version }}/examples/3dSurf/buildMeshSfromMesh3.edp
+      # an installed plugin loads (needs the relocated freefem++.pref lookup)
+      - FreeFem++ -nw $PREFIX/share/FreeFEM/${{ version }}/examples/plugin/ilut.edp
+      # MPI variants: the installed PETSc/SLEPc/hpddm plugins load and solve
+      - if: mpi != "nompi"
+        then:
+          - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/hpddm/diffusion-2d-PETSc.edp -nw
+          - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/hpddm/laplace-2d-SLEPc.edp -nw
+          - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/hpddm/diffusion-substructuring-2d.edp -nw
 
 about:
   homepage: https://freefem.org/
-  license: LGPL-3.0-only
-  license_file: LICENSE.txt
+  # LGPL-3.0-or-later: HPDDM headers compiled into the MPI variants' plugins
+  license: LGPL-3.0-only AND LGPL-3.0-or-later
+  license_file:
+    - LICENSE.txt
+    - if: mpi != "nompi"
+      then: 3rdparty/include/hpddm/LICENSE.md
   summary: 'FreeFem : A high level multiphysics finite element software'
   description: >
     FreeFEM is a popular 2D and 3D partial differential equations (PDE) solver used by

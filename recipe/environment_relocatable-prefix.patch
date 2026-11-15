@@ -1,0 +1,17 @@
+--- src/fflib/environment.cpp.orig
++++ src/fflib/environment.cpp
+@@ -327,7 +327,13 @@
+   EnvironmentInsert("init-files",string(FF_PREFIX_DIR_APPLE) + "/etc/" + ffpref ,"$");
+ #endif
+ #ifdef FF_PREFIX_DIR
+-  EnvironmentInsert("init-files",string(FF_PREFIX_DIR) + "/etc/" + ffpref  ,"$");
++  {
++    // conda-forge: FF_PREFIX_DIR is relocated in the binary at install time (shorter path,
++    // NUL-padded). Read it through a volatile pointer so the compiler can't fold its build-time
++    // length into string(); otherwise the path keeps the old length, with embedded NULs.
++    static const char * volatile ff_prefix_dir = FF_PREFIX_DIR;
++    EnvironmentInsert("init-files",string(ff_prefix_dir) + "/etc/" + ffpref  ,"$");
++  }
+ #endif
+ 
+   if(prognamearg)
