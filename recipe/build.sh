@@ -5,6 +5,8 @@ if [[ -n "$mpi" && "$mpi" != "nompi" ]]; then
   # PETSc/SLEPc from $PREFIX (configure reads lib/petsc/conf/petscvariables and finds libslepc
   # next to it); HPDDM from the zip the recipe puts in 3rdparty/pkg (needed by PETSc plugins)
   export FF_OPTIONS="${FF_OPTIONS} --with-petsc=${PREFIX}/lib --enable-download_hpddm"
+  # BEM plugins: htool + BemTool from the zips in 3rdparty/pkg, boost from $PREFIX
+  export FF_OPTIONS="${FF_OPTIONS} --enable-download_htool --enable-download_bemtool --enable-bemtool --enable-boost"
 else
   export FF_OPTIONS="${FF_OPTIONS} --without-mpi"
 fi
@@ -36,8 +38,11 @@ export LD_LIBRARY_PATH="${PREFIX}/lib"
 # concurrently and the two 'rm -rf hpddm-*; unzip' race (missing HPDDM_define.hpp)
 if [[ -f 3rdparty/pkg/hpddm.zip ]]; then
   mkdir -p 3rdparty/include 3rdparty/lib
-  make -C 3rdparty include/hpddm/done.tag lib/WHERE.hpddm
+  make -C 3rdparty include/hpddm/done.tag lib/WHERE.hpddm \
+    include/htool/done.tag lib/WHERE.htool include/BemTool/done.tag lib/WHERE.bemtool
   test -f 3rdparty/include/hpddm/include/HPDDM_define.hpp
+  test -d 3rdparty/include/htool/include
+  test -d 3rdparty/include/BemTool
 fi
 make -j $CPU_COUNT
 make install

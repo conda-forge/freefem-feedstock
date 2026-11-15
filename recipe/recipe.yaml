@@ -3,7 +3,7 @@ schema_version: 1
 context:
   name: FreeFem
   version: "4.17"
-  build_num: 1
+  build_num: 2
   # nompi gets +100 so the solver prefers it by default
   # https://conda-forge.org/docs/maintainer/knowledge_base/#preferring-a-provider-usually-nompi
   build_number: ${{ build_num + 100 if mpi == "nompi" else build_num }}
@@ -43,6 +43,8 @@ source:
       - environment_relocatable-prefix.patch
       # make check: CPU ulimit (60 s) and MPIEXEC_TIMEOUT (50 s) overridable (FF_TEST_*)
       - test-driver-ff_cpu-limit.patch
+      # bemtool: use boost headers from libboost-headers instead of FreeFEM's bundled boost tarball
+      - 3rdparty_boost-from-prefix.patch
   # HPDDM (header-only, not packaged on conda-forge) is needed by the PETSc/SLEPc/hpddm plugins.
   # It is placed where 3rdparty/getall expects it. getall's md5 check (patched above) accepts it,
   # so --enable-download_hpddm uses it without network access.
@@ -51,6 +53,20 @@ source:
       url: https://codeload.github.com/hpddm/hpddm/zip/refs/tags/v2.4.1
       sha256: 8c9bbd522900efaa5da25572b2718fc8f8b47a435023d242314adedc9de91727
       file_name: hpddm.zip
+      target_directory: 3rdparty/pkg
+  # htool + BemTool (header-only, BEM plugins bem.so / RadiativeTransfer_htool.so): the exact
+  # commits 3rdparty/getall pins; their md5 matches, so getall uses them as-is
+  - if: mpi != "nompi"
+    then:
+      url: https://github.com/htool-ddm/htool/archive/d7c0fa8b42c461446b92a4891dea78532eeea6b5.zip
+      sha256: 4c5f77902d5000add8c4cdd5e82465ce80d9306cb79743ec8ce3da49565a14a5
+      file_name: htool.zip
+      target_directory: 3rdparty/pkg
+  - if: mpi != "nompi"
+    then:
+      url: https://github.com/PierreMarchand20/BemTool/archive/6381b9029e51d31d2e2d53ea42c10747b70563a9.zip
+      sha256: b855d5f1d365bf1cf0a2a1f61fbe4192045420d57aede3c5212c7f1dc961ec53
+      file_name: bemtool.zip
       target_directory: 3rdparty/pkg
 
 build:
@@ -102,6 +118,8 @@ requirements:
         # parmetis/scalapack only exist as MPI builds; FreeFEM only uses them in plugin/mpi
         - parmetis
         - scalapack
+        # bemtool needs boost/math headers
+        - libboost-headers
     - mmgsuite
     - scotch
     - hdf5
@@ -139,15 +157,19 @@ tests:
           - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/hpddm/diffusion-2d-PETSc.edp -nw
           - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/hpddm/laplace-2d-SLEPc.edp -nw
           - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/hpddm/diffusion-substructuring-2d.edp -nw
+          - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/ffddm/Helmholtz_circle_BEM.edp -nw
 
 about:
   homepage: https://freefem.org/
-  # LGPL-3.0-or-later: HPDDM headers compiled into the MPI variants' plugins
-  license: LGPL-3.0-only AND LGPL-3.0-or-later
+  # MPI variants also compile in HPDDM (LGPL-3.0-or-later), BemTool (LGPL-3.0) and htool (MIT)
+  license: LGPL-3.0-only AND LGPL-3.0-or-later AND MIT
   license_file:
     - LICENSE.txt
     - if: mpi != "nompi"
-      then: 3rdparty/include/hpddm/LICENSE.md
+      then:
+        - 3rdparty/include/hpddm/LICENSE.md
+        - 3rdparty/include/BemTool/LICENSE
+        - 3rdparty/include/htool/LICENSE
   summary: 'FreeFem : A high level multiphysics finite element software'
   description: >
     FreeFEM is a popular 2D and 3D partial differential equations (PDE) solver used by

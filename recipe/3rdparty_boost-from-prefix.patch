@@ -1,0 +1,24 @@
+--- 3rdparty/Makefile.am.orig
++++ 3rdparty/Makefile.am
+@@ -186,8 +186,10 @@
+ # end BEMTOOL
+ 
+ # begin BOOST
+-install-boost: ./getall
+-	 if test -n "$(TOOL_COMPILE_bemtool)"; then ./getall -o Boost -a; $(MAKE) boost/done.tag lib/WHERE.boost; else true; fi
++# conda-forge: boost headers come from libboost-headers in $(prefix)/include (bemtool only uses
++# boost/math), so the bundled boost_for_bemtool.tar.gz is neither downloaded nor unpacked
++install-boost:
++	 if test -n "$(TOOL_COMPILE_bemtool)"; then $(MAKE) lib/WHERE.boost; else true; fi
+ reinstall-boost: ./getall
+ 	-rm lib/WHERE.boost
+ 	-rm ./pkg/boost_for_bemtool.tar.gz
+@@ -201,7 +203,7 @@
+ lib/WHERE.boost: ./getall
+ 	if test -d boost/include; then \
+ 	echo boost INCLUDE -I@DIR@/boost/include >> $@ ; \
+-	else true; fi
++	else echo boost INCLUDE -I$(prefix)/include > $@ ; fi
+ # end BOOST
+ 
+ # to reinstall mpi under window afer clean
