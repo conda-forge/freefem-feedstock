@@ -2,8 +2,8 @@ schema_version: 1
 
 context:
   name: FreeFem
-  version: "4.15"
-  build_num: 3
+  version: "4.16"
+  build_num: 0
   # nompi gets +100 so the solver prefers it by default
   # https://conda-forge.org/docs/maintainer/knowledge_base/#preferring-a-provider-usually-nompi
   build_number: ${{ build_num + 100 if mpi == "nompi" else build_num }}
@@ -17,14 +17,12 @@ package:
 
 source:
   url: https://github.com/${{ name }}/${{ name }}-sources/archive/refs/tags/v${{ version }}.tar.gz
-  sha256: a47af5a7c7006ae8c648845e55d732ea403837af869493000a008b2013c698e3
+  sha256: 9921af94fb69c85a650b05b0eeb4d56623af35f5d71d635b7ba5e2508c02246a
   patches:
     - Makefile.am_conda.patch
     - Makefile.am_src_bin-win32_conda.patch
     # NLopt>=2.9 removed LD_LBFGS_NOCEDAL
     - ff-NLopt_nlopt-2.9.patch
-    # upstream a1ec184e6, fixes testvtk.edp segfault
-    - iovtk_fix_n_name_param_MeshS.patch
     # HDF5>=2 h5cc -showconfig lists libs ';'-separated
     - ax_lib_hdf5_cmake-lists.patch
     # detect conda-forge superlu/scotch/mmg (SuperLu, scotch, mmg plugins)
