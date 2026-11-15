@@ -2,6 +2,9 @@
 set -ex
 if [[ -n "$mpi" && "$mpi" != "nompi" ]]; then
   export FF_OPTIONS="${FF_OPTIONS} --with-mpi=yes"
+  # PETSc/SLEPc from $PREFIX (configure reads lib/petsc/conf/petscvariables and finds libslepc
+  # next to it); HPDDM from the zip the recipe puts in 3rdparty/pkg (needed by PETSc plugins)
+  export FF_OPTIONS="${FF_OPTIONS} --with-petsc=${PREFIX}/lib --enable-download_hpddm"
 else
   export FF_OPTIONS="${FF_OPTIONS} --without-mpi"
 fi
@@ -23,6 +26,7 @@ export LD_LIBRARY_PATH="${PREFIX}/lib"
 ./configure --prefix=$PREFIX \
             ${FF_OPTIONS} \
             --enable-summary \
+            --enable-gmm \
             --enable-optim
 
 make -j $CPU_COUNT

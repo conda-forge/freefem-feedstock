@@ -1,0 +1,11 @@
+--- plugin/mpi/PETSc-code.hpp.orig
++++ plugin/mpi/PETSc-code.hpp
+@@ -791,7 +791,7 @@
+           }
+           if (ptA->_A) {
+               ptA->_A->setMatrix(dN);
+-#if defined(PCHPDDM) && defined(PETSC_USE_SHARED_LIBRARIES)
++#if defined(PETSC_HAVE_HPDDM) && defined(PETSC_USE_SHARED_LIBRARIES)
+               PC pc = nullptr;
+               if(ptParent) {
+                   PetscInt M, N;

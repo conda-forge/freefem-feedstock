@@ -1,0 +1,15 @@
+--- 3rdparty/getall.orig
++++ 3rdparty/getall
+@@ -180,10 +180,10 @@
+ 		'htool.zip',
+ 		'a31c9a01b81b7e7f7724ffc8f3515d0c');
+ 
+-download('hpddm','https://codeload.github.com/hpddm/hpddm/zip/7113b9a6b77fceee3f52490cb27941a87b96542f',
++download('hpddm','https://codeload.github.com/hpddm/hpddm/zip/refs/tags/v2.4.1',
+ 	'https://codeload.github.com/hpddm',
+ 	'hpddm.zip',
+-	'6910b7b974f0b60d9c247c666e7f3862');
++	'8316d114865d00426e24dc7388b18db9');
+ 
+ download('bemtool','https://github.com/PierreMarchand20/BemTool/archive/6381b9029e51d31d2e2d53ea42c10747b70563a9.zip',
+ 	'https://github.com/PierreMarchand20/BemTool',
