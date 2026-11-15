@@ -6,7 +6,7 @@ else
   export FF_OPTIONS="${FF_OPTIONS} --without-mpi"
 fi
 
-if [[ "$ARCH" == "64" ]]; then
+if [[ "${target_platform}" == *-64 ]]; then
   export FF_OPTIONS="${FF_OPTIONS} --enable-m64"
 else
   export FF_OPTIONS="${FF_OPTIONS} --enable-m32"
