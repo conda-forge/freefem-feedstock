@@ -35,7 +35,7 @@ ipopt:
 libblas:
 - 3.9.* *netlib
 libboost_headers:
-- '1.88'
+- '1.90'
 libcblas:
 - 3.9.* *netlib
 liblapack:
