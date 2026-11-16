@@ -3,10 +3,10 @@ schema_version: 1
 context:
   name: FreeFem
   version: "4.17"
-  build_num: 2
+  build_num: 1
   # nompi gets +100 so the solver prefers it by default
   # https://conda-forge.org/docs/maintainer/knowledge_base/#preferring-a-provider-usually-nompi
-  build_number: ${{ build_num + 100 if mpi == "nompi" else build_num }}
+  build_number: 1
   # build string prefix so dependents can select a variant:
   #   `freefem * mpi_mpich_*`, `freefem * mpi_*`, `freefem * nompi_*`
   mpi_prefix: ${{ "nompi" if mpi == "nompi" else "mpi_" ~ mpi }}
