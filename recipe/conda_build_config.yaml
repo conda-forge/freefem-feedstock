@@ -3,3 +3,8 @@ mpi:
   - mpich  # [unix]
   - openmpi  # [unix]
   - msmpi # [win]
+# PETSc/SLEPc scalar type (MPI variants only; nompi+complex is skipped). conda-forge's real and
+# complex petsc can't be co-installed, so complex PETSc plugins need their own freefem variant.
+scalar:
+  - real
+  - complex

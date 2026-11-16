@@ -12,6 +12,18 @@
  
  TESTS_PETSCCOMPLEX = diffusion-2d-PETSc-complex.edp \
  	helmholtz-2d-PETSc-complex.edp \
+@@ -138,8 +139,10 @@
+ 
+ TESTS_PETSCCOMPLEX_MUMPS = maxwell-mg-3d-PETSc-complex.edp
+ 
++# conda-forge: navier-stokes-2d-SLEPc-complex.edp dropped. It reads navier-stokes-2d_*.msh written by
++# the real navier-stokes-2d-PETSc.edp, and a conda build never has both real and complex PETSc
+ TESTS_PETSCCOMPLEX_SLEPCCOMPLEX = laplace-2d-SLEPc-complex.edp \
+-	navier-stokes-2d-SLEPc-complex.edp helmholtz-2d-SLEPc-complex.edp \
++	helmholtz-2d-SLEPc-complex.edp \
+ 	nonlinear-2d-SLEPc-complex.edp blasius-stability-1d-SLEPc-complex.edp
+ 
+ TESTS_PETSCCOMPLEX_BEMTOOL_BOOST_HTOOL = helmholtz-3d-surf-PETSc-complex.edp \
 --- examples/ffddm/Makefile.am.orig
 +++ examples/ffddm/Makefile.am
 @@ -48,7 +48,9 @@

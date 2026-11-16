@@ -3,9 +3,28 @@ About freefem-feedstock
 
 Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/freefem-feedstock/blob/main/LICENSE.txt)
 
+
+About freefem
+-------------
+
 Home: https://freefem.org/
 
-Package license: LGPL-3.0-only
+Package license: LGPL-3.0-only AND LGPL-3.0-or-later AND MIT
+
+Summary: FreeFem : A high level multiphysics finite element software
+
+Development: https://github.com/FreeFem/FreeFem-sources
+
+Documentation: https://doc.freefem.org/
+
+FreeFEM is a popular 2D and 3D partial differential equations (PDE) solver used by thousands of researchers across the world. It allows you to easily implement your own physics modules using the provided FreeFEM language. FreeFEM offers a large list of finite elements, like the Lagrange, Taylor-Hood, etc., usable in the continuous and discontinuous Galerkin method framework.
+
+About freefem
+-------------
+
+Home: https://freefem.org/
+
+Package license: LGPL-3.0-only AND LGPL-3.0-or-later AND MIT
 
 Summary: FreeFem : A high level multiphysics finite element software
 

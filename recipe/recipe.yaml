@@ -3,13 +3,15 @@ schema_version: 1
 context:
   name: FreeFem
   version: "4.17"
-  build_num: 2
+  build_num: 3
   # nompi gets +100 so the solver prefers it by default
   # https://conda-forge.org/docs/maintainer/knowledge_base/#preferring-a-provider-usually-nompi
   build_number: ${{ build_num + 100 if mpi == "nompi" else build_num }}
   # build string prefix so dependents can select a variant:
   #   `freefem * mpi_mpich_*`, `freefem * mpi_*`, `freefem * nompi_*`
-  mpi_prefix: ${{ "nompi" if mpi == "nompi" else "mpi_" ~ mpi }}
+  # complex PETSc/SLEPc variant: `freefem * mpi_openmpi_complex_*` (real is the default and keeps
+  # the old build strings)
+  mpi_prefix: ${{ "nompi" if mpi == "nompi" else "mpi_" ~ mpi ~ ("_complex" if scalar == "complex" else "") }}
 
 package:
   name: ${{ name | lower }}
@@ -75,10 +77,15 @@ build:
     file: build.sh
     env:
       mpi: ${{ mpi }}
+      scalar: ${{ scalar }}
   string: ${{ mpi_prefix }}_h${{ hash }}_${{ build_number }}
+  # the solver only picks the complex variant when asked for it
+  variant:
+    down_prioritize_variant: ${{ 1 if scalar == "complex" else 0 }}
   skip:
     - osx
     - win
+    - mpi == "nompi" and scalar == "complex"
 
 requirements:
   build:
@@ -113,8 +120,8 @@ requirements:
         - mumps-mpi
         - ${{ mpi }}
         # PETSc/SLEPc plugins only exist in plugin/mpi
-        - petsc
-        - slepc
+        - petsc * ${{ scalar }}_*
+        - slepc * ${{ scalar }}_*
         # parmetis/scalapack only exist as MPI builds; FreeFEM only uses them in plugin/mpi
         - parmetis
         - scalapack
@@ -151,13 +158,19 @@ tests:
       - FreeFem++ -nw $PREFIX/share/FreeFEM/${{ version }}/examples/3dSurf/buildMeshSfromMesh3.edp
       # an installed plugin loads (needs the relocated freefem++.pref lookup)
       - FreeFem++ -nw $PREFIX/share/FreeFEM/${{ version }}/examples/plugin/ilut.edp
-      # MPI variants: the installed PETSc/SLEPc/hpddm plugins load and solve
+      # MPI variants: the installed PETSc/SLEPc/hpddm/BEM plugins load and solve
       - if: mpi != "nompi"
+        then:
+          - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/hpddm/diffusion-substructuring-2d.edp -nw
+          - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/ffddm/Helmholtz_circle_BEM.edp -nw
+      - if: mpi != "nompi" and scalar == "real"
         then:
           - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/hpddm/diffusion-2d-PETSc.edp -nw
           - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/hpddm/laplace-2d-SLEPc.edp -nw
-          - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/hpddm/diffusion-substructuring-2d.edp -nw
-          - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/ffddm/Helmholtz_circle_BEM.edp -nw
+      - if: mpi != "nompi" and scalar == "complex"
+        then:
+          - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/hpddm/diffusion-2d-PETSc-complex.edp -nw
+          - ff-mpirun -np 2 $PREFIX/share/FreeFEM/${{ version }}/examples/hpddm/laplace-2d-SLEPc-complex.edp -nw
 
 about:
   homepage: https://freefem.org/
