@@ -4,7 +4,13 @@ if [[ -n "$mpi" && "$mpi" != "nompi" ]]; then
   export FF_OPTIONS="${FF_OPTIONS} --with-mpi=yes"
   # PETSc/SLEPc from $PREFIX (configure reads lib/petsc/conf/petscvariables and finds libslepc
   # next to it); HPDDM from the zip the recipe puts in 3rdparty/pkg (needed by PETSc plugins)
-  export FF_OPTIONS="${FF_OPTIONS} --with-petsc=${PREFIX}/lib --enable-download_hpddm"
+  if [[ "${scalar:-real}" == "complex" ]]; then
+    # complex variant: PETSc-complex.so/SLEPc-complex.so instead of PETSc.so/SLEPc.so
+    export FF_OPTIONS="${FF_OPTIONS} --with-petsc_complex=${PREFIX}/lib"
+  else
+    export FF_OPTIONS="${FF_OPTIONS} --with-petsc=${PREFIX}/lib"
+  fi
+  export FF_OPTIONS="${FF_OPTIONS} --enable-download_hpddm"
   # BEM plugins: htool + BemTool from the zips in 3rdparty/pkg, boost from $PREFIX
   export FF_OPTIONS="${FF_OPTIONS} --enable-download_htool --enable-download_bemtool --enable-bemtool --enable-boost"
 else
